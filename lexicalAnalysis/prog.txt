@@ -1,0 +1,5 @@
+int main() {
+printf("hello");
+int _main123_void_var = 1;
+return 0;
+}
