@@ -5,17 +5,20 @@
 #include <cassert>
 #include <algorithm>
 
-#define MAX_LEN 100
+#define MAX_LEN 1000
 using namespace std;
 int current_position = 0; // record current reading position
 const string backspace = " ";
+const string enter = "\n";
 const string keyword[] = {
 	"auto", "double", "int", "struct", "break", "else", "long", "switch",
 	"case", "enum", "register", "typedef", "char", "extern", "return", "union",
 	"const", "float", "short", "unsigned", "continue", "for", "signed", "void",
 	"default", "goto", "sizeof", "volatile", "do", "if", "while", "static"
 };
-const string symbol[] = {"<", ">", "!=", ">=", "<=", "==", ",", ";", "(", ")", "{", "}", "+", "-", "*", "/", "="};
+const string symbol[] = {
+	"<", ">", "!=", ">=", "<=", "==", ",", ";", "(", ")", "{", "}", "+", "-", "*", "/", "=", "++", "--"
+};
 //存放文件取出的字符
 string letter[MAX_LEN];
 //将字符转换为单词
@@ -75,10 +78,25 @@ bool isKeyword(string s)
 	return false;
 }
 
+bool isOperator(string str)
+{
+	return false;
+}
+
+void isInt(const string& str, int& i)
+{
+	for (; i < str.length(); ++i)
+	{
+		if (isDigit(str[i]))
+			continue;
+		else
+			return;
+	}
+}
+
+
 int typeofWord(string str)
 {
-	if (!str.compare(backspace))
-		return 0;
 	if ((str >= "a" && str <= "z") || (str >= "A" && str <= "z"))
 		return 1; //letter
 	if (str >= "0" && str <= "9")
@@ -87,12 +105,85 @@ int typeofWord(string str)
 		str == "{" || str == "}"
 		|| str == "+" || str == "-" || str == "*" || str == "/")
 		return 3; // form
+	// if (!str.compare(backspace))
+	// 	return 0;
 }
 
-string identify(string str, int& pos)
+bool isConstant(string str)
+{
+	auto i = 0;
+	isInt(str, i);
+	if (i != 0)
+	{
+		if (str[i] == '.')
+		{
+			i++;
+			isInt(str, i);
+			if (str[i] == 'E')
+			{
+				i++;
+				if (str[i] == '+' || str[i] == '-')
+				{
+					i++;
+					isInt(str, i);
+					return true;
+				}
+			}
+		}
+		if (str[i] == 'E')
+		{
+			i++;
+			if (str[i] == '+' || str[i] == '-')
+			{
+				i++;
+				isInt(str, i);
+				return true;
+			}
+		}
+		if (typeofWord(letter[i]) == 3)
+		{
+			i++;
+			return true;
+		}
+	}
+
+
+	return false;
+}
+
+bool isSymbol(string str)
+{
+	auto symbol_num = sizeof(symbol) / sizeof(symbol[0]);
+	for (auto i = 0; i < symbol_num; ++i)
+	{
+		if (!symbol[i].compare(str))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+string identifyWord(string str, int& pos)
 {
 	pos += 1;
-	while (letter[pos].compare(backspace) || typeofWord(letter[pos]) != 3)
+	while (letter[pos].compare(backspace) && typeofWord(letter[pos]) != 3)
+	{
+		str.append(letter[pos]);
+		pos++;
+	}
+	if (!letter[pos].compare(backspace))
+	{
+		pos++;
+	}
+	return str;
+}
+
+string identifyNum(string str, int& pos)
+{
+	pos += 1;
+	while (typeofWord(letter[pos]) == 2 || letter[pos] == "." || letter[pos] == "E" || letter[pos] == "+" || letter[pos]
+		== "-")
 	{
 		str.append(letter[pos]);
 		pos++;
@@ -100,33 +191,75 @@ string identify(string str, int& pos)
 	return str;
 }
 
+string identifySym(string str, int& pos)
+{
+	pos += 1;
+	if (!letter[pos].compare(backspace) && typeofWord(letter[pos]) == 3)
+	{
+		// pos++;
+		auto first = letter[pos - 1];
+		auto second = letter[pos];
+		if ((second == "=" && ((first == "<" || first == ">" || first == "=" || first == "!")) || (second == first && (
+			first == "+" || first == "-"))));
+		str.append(letter[pos]);
+	}
+	return str;
+}
+
+void printRes(string str, string res)
+{
+	cout << "<" << str << ":" << res << ">" << endl;
+}
+
 void getWord()
 {
 	string word;
-	for (current_position = 0; current_position < letter->length();)
+	for (current_position = 0; current_position < sizeof(letter) / sizeof(letter[0]);)
 	{
-		auto type = typeofWord(letter[current_position]);
-		switch (type)
+		if (backspace.compare(letter[current_position]) && enter.compare(letter[current_position]))
 		{
-		case 1:
+			auto type = typeofWord(letter[current_position]);
+			switch (type)
 			{
-				word = identify(letter[current_position], current_position);
-				cout << word << endl;
-			}
-		case 2:
-			{
-			}
-		case 3:
-			{
-			}
-		default:
-			{
+			case 1:
+				{
+					word = identifyWord(letter[current_position], current_position);
+					if (isKeyword(word))
+					{
+						printRes(word, "keyword");
+						break;
+					}
+					else if (isId(word))
+					{
+						printRes(word, "id");
+					}
+					break;
+				}
+			case 2:
+				{
+					word = identifyNum(letter[current_position], current_position);
+					if (isConstant(word))
+						printRes(word, "constant");
+					break;
+				}
+			case 3:
+				{
+					word = identifySym(letter[current_position], current_position);
+					if (isSymbol(word))
+						printRes(word, "symbol");
+					break;
+				}
+			default:
+				{
+				}
 			}
 		}
+		else
+			current_position++;
 	}
 }
 
-void read_file(ifstream &example_file)
+void read_file(ifstream& example_file)
 {
 	assert(example_file.is_open());
 	char c;
@@ -136,13 +269,13 @@ void read_file(ifstream &example_file)
 	while (!example_file.eof())
 	{
 		example_file >> c;
-		// cout << c;
 		// if (c != ' ')
 		// {
 		letter[length] = c;
 		length++;
 		// }
 	}
+	getWord();
 }
 
 int main()
@@ -151,14 +284,17 @@ int main()
 	char buff[255];
 
 	ifstream example_file("prog.txt");
-	// read_file(example_file);
-	// getWord
-	cout << isLetter('s');
+	read_file(example_file);
+
+	// cout << isLetter('s');
 
 	// for (auto i = 0; i < length; ++i)
 	// {
 	// 	cout << letter[i];
 	// }
+	// cout << isConstant("46E-8");
+	// cout << isKeyword("int");
+	// cout << isSymbol("2+");
 	system("pause");
 	return 0;
 }

@@ -1,5 +1,7 @@
 int main() {
-printf("hello");
-int _main123_void_var = 1;
+double a = 4.6E-8;
+int b = 45629;
+printf(1<=2);
+char* _main123_void_var = "string~";
 return 0;
 }
