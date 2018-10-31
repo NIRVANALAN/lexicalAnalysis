@@ -18,7 +18,7 @@ const string keyword[] = {
 	"default", "goto", "sizeof", "volatile", "do", "if", "while", "static"
 };
 const string symbol[] = {
-	"<", ">", "!=", ">=", "<=", "==", ",", ";", "(", ")", "{", "}", "+", "-", "*", "/", "=", "++", "--", "\""
+	"<", ">", "!=", ">=", "<=", "==", ",", ";", "(", ")", "{", "}", "+", "-", "*", "/", "=", "++", "--", "\"","[","]"
 };
 //存放文件取出的字符
 string letter[MAX_LEN];
@@ -89,27 +89,29 @@ void isInt(const string& str, int& i)
 	for (; i < str.length(); ++i)
 	{
 		if (isDigit(str[i]))
+		{
+			// i++;
 			continue;
+		}
 		else
 			return;
 	}
 }
 
-
 int typeofWord(string str)
 {
-	if ((str >= "a" && str <= "z") || (str >= "A" && str <= "z"))
+	if ((str >= "a" && str <= "z") || (str >= "A" && str <= "Z"))
 		return 1; //letter
 	if (str >= "0" && str <= "9")
 		return 2; //num
 	if (str == ">" || str == "=" || str == "<" || str == "!" || str == "," || str == ";" || str == "(" || str == ")" ||
 		str == "{" || str == "}"
-		|| str == "+" || str == "-" || str == "*" || str == "/")
+		|| str == "+" || str == "-" || str == "*" || str == "/" || str == "[" || str == "]")
 		return 3; // form
 	if (str == "\"")
 		return 4;
-	// if (str == "#")
-	// 	return 5;
+	if (str == "#")
+		return 5;
 	// if (!str.compare(backspace))
 	// 	return 0;
 }
@@ -118,6 +120,8 @@ bool isConstant(string str)
 {
 	auto i = 0;
 	isInt(str, i);
+	if (i == str.length())
+		return true;
 	if (i != 0)
 	{
 		if (str[i] == '.')
@@ -172,7 +176,7 @@ bool isSymbol(string str)
 string identifyWord(string str, int& pos)
 {
 	pos += 1;
-	while (letter[pos].compare(backspace) && typeofWord(letter[pos]) != 3)
+	while (letter[pos].compare(backspace) && typeofWord(letter[pos]) != 3 && letter[pos].compare(enter))
 	{
 		str.append(letter[pos]);
 		pos++;
@@ -219,7 +223,7 @@ string identifySym(string str, int& pos)
 			if (second == "*")
 			{
 				pos++;
-				while (letter[pos] != "*" && letter[pos + 1] != "/")
+				while (!(letter[pos] == "*" && letter[pos + 1] == "/"))
 				{
 					pos++;
 				}
@@ -237,7 +241,7 @@ string identifySym(string str, int& pos)
 
 void printRes(string str, string res)
 {
-	cout << "<" << str << ":" << res << ">" << endl;
+	cout << "< " << str << " : " << res << " >" << endl;
 }
 
 string identifyString(string str, int& pos)
@@ -252,25 +256,23 @@ string identifyString(string str, int& pos)
 	pos++;
 	return str;
 };
-//
-// string identifyMacro(string str, int& pos)
-// {
-// 	pos += 1;
-// 	while (letter[pos] != "\n")
-// 	{
-// 		pos++;
-// 		str.append(letter[pos]);
-// 	}
-// 	pos++;
-// 	return str;
-// }
+
+void identifyMacro(int& pos)
+{
+	pos += 1;
+	while (letter[pos] != "\n")
+	{
+		pos++;
+	}
+	pos++;
+}
 
 void getWord()
 {
 	string word;
 	for (current_position = 0; current_position < length;)
 	{
-		if (backspace.compare(letter[current_position]) && enter.compare(letter[current_position])&&preprocess.compare(letter[current_position]))
+		if (backspace.compare(letter[current_position]) && enter.compare(letter[current_position]))
 		{
 			auto type = typeofWord(letter[current_position]);
 			switch (type)
@@ -310,12 +312,12 @@ void getWord()
 					printRes(word, "string");
 					break;
 				}
-			// case 5:
-			// 	{
-			// 		word = identifyMacro(letter[current_position], current_position);
-			// 		// printRes(word, "Macro");
-			// 		break;
-			// 	}
+			case 5:
+				{
+					identifyMacro(current_position);
+					// printRes(word, "Macro");
+					break;
+				}
 			default:
 				{
 				}
@@ -346,9 +348,10 @@ void read_file(ifstream& example_file)
 int main()
 {
 	FILE* file = nullptr;
-	char buff[255];
+	char buff[MAX_LEN];
 
-	ifstream example_file("prog.txt");
+	// ifstream example_file("prog.txt");
+	ifstream example_file("Text.txt");
 	read_file(example_file);
 	getWord();
 
@@ -357,6 +360,8 @@ int main()
 	// {
 	// 	cout << letter[i];
 	// }
+
+	// cout << typeofWord("[");
 	// cout << isConstant("46E-8");
 	// cout << isKeyword("int");
 	// cout << isSymbol("2+");

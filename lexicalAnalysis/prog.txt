@@ -1,3 +1,11 @@
-#include <cstdlib>
-int main() {
+#define max 100
+int main(){
+//d**
+id
+/****yes*****/
+double a = 4.6E-8;
+int b = 45629;
+printf(1<=2);
+char* _main123_void_var = "string~";
+return 0;
 }

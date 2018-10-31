@@ -29,5 +29,8 @@
     <Text Include="prog.txt">
       <Filter>Resource Files\input</Filter>
     </Text>
+    <Text Include="tmp.txt">
+      <Filter>Resource Files\input</Filter>
+    </Text>
   </ItemGroup>
 </Project>
