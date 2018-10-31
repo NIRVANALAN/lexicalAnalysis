@@ -1,2 +1,10 @@
-_main123_void_var
-main12121_321
+int main(){
+//d
+/*yes*/
+double a = 4.6E-8;
+int b = 45629;
+printf(1<=2);
+char* _main123_void_var = "string~";
+return 0;
+}
+_321

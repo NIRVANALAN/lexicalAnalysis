@@ -10,6 +10,7 @@ using namespace std;
 int current_position = 0; // record current reading position
 const string backspace = " ";
 const string enter = "\n";
+const string preprocess = "#";
 const string keyword[] = {
 	"auto", "double", "int", "struct", "break", "else", "long", "switch",
 	"case", "enum", "register", "typedef", "char", "extern", "return", "union",
@@ -17,7 +18,7 @@ const string keyword[] = {
 	"default", "goto", "sizeof", "volatile", "do", "if", "while", "static"
 };
 const string symbol[] = {
-	"<", ">", "!=", ">=", "<=", "==", ",", ";", "(", ")", "{", "}", "+", "-", "*", "/", "=", "++", "--"
+	"<", ">", "!=", ">=", "<=", "==", ",", ";", "(", ")", "{", "}", "+", "-", "*", "/", "=", "++", "--", "\""
 };
 //存放文件取出的字符
 string letter[MAX_LEN];
@@ -105,6 +106,10 @@ int typeofWord(string str)
 		str == "{" || str == "}"
 		|| str == "+" || str == "-" || str == "*" || str == "/")
 		return 3; // form
+	if (str == "\"")
+		return 4;
+	// if (str == "#")
+	// 	return 5;
 	// if (!str.compare(backspace))
 	// 	return 0;
 }
@@ -194,14 +199,38 @@ string identifyNum(string str, int& pos)
 string identifySym(string str, int& pos)
 {
 	pos += 1;
-	if (!letter[pos].compare(backspace) && typeofWord(letter[pos]) == 3)
+	if (letter[pos].compare(backspace) && typeofWord(letter[pos]) == 3)
 	{
 		// pos++;
 		auto first = letter[pos - 1];
 		auto second = letter[pos];
+		if (first == "/")
+		{
+			if (second == "/")
+			{
+				pos++;
+				while (letter[pos] != "\n")
+				{
+					pos++;
+				}
+				pos++;
+				return "annotation";
+			}
+			if (second == "*")
+			{
+				pos++;
+				while (letter[pos] != "*" && letter[pos + 1] != "/")
+				{
+					pos++;
+				}
+				pos += 2;
+				return "annotation";
+			}
+		}
+
 		if ((second == "=" && ((first == "<" || first == ">" || first == "=" || first == "!")) || (second == first && (
-			first == "+" || first == "-"))));
-		str.append(letter[pos]);
+			first == "+" || first == "-"))))
+			str.append(letter[pos]);
 	}
 	return str;
 }
@@ -211,12 +240,37 @@ void printRes(string str, string res)
 	cout << "<" << str << ":" << res << ">" << endl;
 }
 
+string identifyString(string str, int& pos)
+{
+	// pos += 1;
+	while (letter[pos] != "\\" && letter[pos + 1] != ";")
+	{
+		str.append(letter[pos]);
+		pos++;
+	}
+	str.append(letter[pos]);
+	pos++;
+	return str;
+};
+//
+// string identifyMacro(string str, int& pos)
+// {
+// 	pos += 1;
+// 	while (letter[pos] != "\n")
+// 	{
+// 		pos++;
+// 		str.append(letter[pos]);
+// 	}
+// 	pos++;
+// 	return str;
+// }
+
 void getWord()
 {
 	string word;
-	for (current_position = 0; current_position < sizeof(letter) / sizeof(letter[0]);)
+	for (current_position = 0; current_position < length;)
 	{
-		if (backspace.compare(letter[current_position]) && enter.compare(letter[current_position]))
+		if (backspace.compare(letter[current_position]) && enter.compare(letter[current_position])&&preprocess.compare(letter[current_position]))
 		{
 			auto type = typeofWord(letter[current_position]);
 			switch (type)
@@ -245,10 +299,23 @@ void getWord()
 			case 3:
 				{
 					word = identifySym(letter[current_position], current_position);
-					if (isSymbol(word))
-						printRes(word, "symbol");
+					if (word != "annotation")
+						if (isSymbol(word))
+							printRes(word, "symbol");
 					break;
 				}
+			case 4:
+				{
+					word = identifyString(letter[current_position], current_position);
+					printRes(word, "string");
+					break;
+				}
+			// case 5:
+			// 	{
+			// 		word = identifyMacro(letter[current_position], current_position);
+			// 		// printRes(word, "Macro");
+			// 		break;
+			// 	}
 			default:
 				{
 				}
@@ -263,19 +330,17 @@ void read_file(ifstream& example_file)
 {
 	assert(example_file.is_open());
 	char c;
-	auto length = 0;
 	example_file >> noskipws;
-
-	while (!example_file.eof())
+	if (example_file.peek() == EOF)
+	{
+		cout << "file is empty" << endl;
+	}
+	while (example_file.peek() != EOF)
 	{
 		example_file >> c;
-		// if (c != ' ')
-		// {
 		letter[length] = c;
 		length++;
-		// }
 	}
-	getWord();
 }
 
 int main()
@@ -285,9 +350,9 @@ int main()
 
 	ifstream example_file("prog.txt");
 	read_file(example_file);
+	getWord();
 
 	// cout << isLetter('s');
-
 	// for (auto i = 0; i < length; ++i)
 	// {
 	// 	cout << letter[i];
@@ -295,6 +360,7 @@ int main()
 	// cout << isConstant("46E-8");
 	// cout << isKeyword("int");
 	// cout << isSymbol("2+");
+	// cout << identifyString("string");
 	system("pause");
 	return 0;
 }
