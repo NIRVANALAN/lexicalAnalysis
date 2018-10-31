@@ -18,8 +18,14 @@ const string keyword[] = {
 	"default", "goto", "sizeof", "volatile", "do", "if", "while", "static"
 };
 const string symbol[] = {
-	"<", ">", "!=", ">=", "<=", "==", ",", ";", "(", ")", "{", "}", "+", "-", "*", "/", "=", "++", "--", "\"","[","]"
+	"<", ">", "!=", ">=", "<=", "==", ",", ";", "(", ")", "{", "}", "+", "-", "*", "/", "=", "++", "--", "\"","[","]","'"
 };
+auto line_num = 0;
+auto keyword_num = 0;
+auto symbol_num = 0;
+auto id_num = 0;
+auto string_num = 0;
+auto err_flag = 0;
 //存放文件取出的字符
 string letter[MAX_LEN];
 //将字符转换为单词
@@ -43,7 +49,7 @@ void printFile(FILE* file)
 
 bool isLetter(char str)
 {
-	return (str >= 'a' && str <= 'z') || (str >= 'A' && str <= 'z');
+	return (str >= 'a' && str <= 'z') || (str >= 'A' && str <= 'Z');
 }
 
 bool isDigit(char s)
@@ -106,7 +112,7 @@ int typeofWord(string str)
 		return 2; //num
 	if (str == ">" || str == "=" || str == "<" || str == "!" || str == "," || str == ";" || str == "(" || str == ")" ||
 		str == "{" || str == "}"
-		|| str == "+" || str == "-" || str == "*" || str == "/" || str == "[" || str == "]")
+		|| str == "+" || str == "-" || str == "*" || str == "/" || str == "[" || str == "]"||str=="'")
 		return 3; // form
 	if (str == "\"")
 		return 4;
@@ -200,14 +206,19 @@ string identifyNum(string str, int& pos)
 	return str;
 }
 
+bool endLine(int pos)
+{
+	return false;
+}
+
 string identifySym(string str, int& pos)
 {
 	pos += 1;
-	if (letter[pos].compare(backspace) && typeofWord(letter[pos]) == 3)
+	auto first = letter[pos - 1];
+	auto second = letter[pos];
+	if (second.compare(backspace) && typeofWord(second) == 3)
 	{
-		// pos++;
-		auto first = letter[pos - 1];
-		auto second = letter[pos];
+		// for annotation
 		if (first == "/")
 		{
 			if (second == "/")
@@ -231,10 +242,28 @@ string identifySym(string str, int& pos)
 				return "annotation";
 			}
 		}
-
+		// for operator like == >= <= !=
 		if ((second == "=" && ((first == "<" || first == ">" || first == "=" || first == "!")) || (second == first && (
 			first == "+" || first == "-"))))
 			str.append(letter[pos]);
+	}
+		// for error process
+	// char c = '';
+	// char c = 'cc';
+	if (first=="'"&&err_flag!=1)
+	{
+		if(letter[pos+1]!="'")
+		{
+			err_flag = 1;
+			cerr << " multiple char include in ' error in line " << __LINE__ << endl;
+			//deal err
+			while (letter[pos]!="'")
+			{
+				pos++;
+			}
+			pos ++;
+		}
+
 	}
 	return str;
 }
@@ -283,10 +312,12 @@ void getWord()
 					if (isKeyword(word))
 					{
 						printRes(word, "keyword");
+						keyword_num++;
 						break;
 					}
 					else if (isId(word))
 					{
+						id_num++;
 						printRes(word, "id");
 					}
 					break;
@@ -295,7 +326,10 @@ void getWord()
 				{
 					word = identifyNum(letter[current_position], current_position);
 					if (isConstant(word))
+					{
+						id_num++;
 						printRes(word, "constant");
+					}
 					break;
 				}
 			case 3:
@@ -303,13 +337,19 @@ void getWord()
 					word = identifySym(letter[current_position], current_position);
 					if (word != "annotation")
 						if (isSymbol(word))
+						{
+							symbol_num++;
 							printRes(word, "symbol");
+						}
 					break;
 				}
 			case 4:
 				{
 					word = identifyString(letter[current_position], current_position);
-					printRes(word, "string");
+					{
+						string_num++;
+						printRes(word, "string");
+					}
 					break;
 				}
 			case 5:
@@ -349,12 +389,16 @@ int main()
 {
 	FILE* file = nullptr;
 	char buff[MAX_LEN];
-
 	// ifstream example_file("prog.txt");
-	ifstream example_file("Text.txt");
+	ifstream example_file("tmp.txt");
 	read_file(example_file);
 	getWord();
-
+	cout << endl;
+	cout<<"id num"<<" : "<<id_num<<endl;
+	cout<<"string num"<<" : "<<string_num<<endl;
+	cout<<"keyword num"<<" : "<<keyword_num<<endl;
+	cout<<"symbol num"<<" : "<<symbol_num<<endl;
+	cout << "char num" << " : " << length << endl;
 	// cout << isLetter('s');
 	// for (auto i = 0; i < length; ++i)
 	// {

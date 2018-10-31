@@ -1,40 +1,6 @@
-/***************01背包问题******************/
-#include <cstdlib>
+'cc'
+/* ' error in line258
+< ' : symbol > */
+int a = 1;
+// 单引号中不能有两个字符
 
-#define INF -65536
-const int V=1000;//定义体积的最大值；
-const int T=5;//定义商品的数目；
-int f[V+1];
-//#define EMPTY
-int w[T]={6,8,3,9,2};//商品的价值；
-int c[T]={400,600,500,600,900};//商品的体积；
-int package()
-{
-    #ifdef EMPTY//可以不装满
-        for(int i=0;i<=V;i++)//条件编译，表示可以不存储满
-        {
-            f[i]=0;
-        }
-    #else//必须装满
-        f[0]=0;
-        for(int i=1;i<=V;i++)//条件编译，表示必须存储满
-        {
-            f[i]=INF;
-        }
-    #endif // EMPTY
-    for(int i=0;i<T;i++)
-    {
-        for(int v=V;v>=c[i];v--)
-        {
-            f[v]=max(f[v],f[v-c[i]]+w[i]);
-        }
-    }
-    return f[V];
-}
-int main()
-{
-    int temp;
-    temp=package();
-    cout<<temp<<endl;
-    return 0;
-}
