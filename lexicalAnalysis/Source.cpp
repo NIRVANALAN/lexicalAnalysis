@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <cassert>
+#include <sstream>
 #include <algorithm>
 
 #define MAX_LEN 1000
@@ -35,10 +36,21 @@ string words[MAX_LEN];
 int length; //保存程序中字符的数目
 int num;
 
+void error_report(int line, string error_detail)
+{
+	cerr << error_detail << " at line " << line << endl;
+}
+
+void string2int(int& int_temp, const string& string_tem)
+{
+	stringstream stream(string_tem);
+	stream >> int_temp;
+}
+
 void printFile(FILE* file)
 {
 	if (file == nullptr)
-		printf("file not exist");
+		error_report( __LINE__, "file not exist");
 
 	char ch = (char)fgetc(file);
 	while (ch != EOF)
@@ -94,11 +106,17 @@ bool isOperator(string str)
 
 void isInt(const string& str, int& i)
 {
+	auto int_temp = 0;
+	string2int(int_temp, str);
+	if (int_temp == INT_MAX)
+	{
+		error_report(__LINE__, "INT may has overflow");
+		return;
+	}
 	for (; i < str.length(); ++i)
 	{
 		if (isDigit(str[i]))
 		{
-			// i++;
 			continue;
 		}
 		else
@@ -406,6 +424,10 @@ int main()
 	ifstream example_file("tmp.txt");
 	read_file(example_file);
 	getWord();
+	// string s("12345");
+	// auto i = 0;
+	// string2int(i, s);
+	// cout << i<<endl;
 	cout << endl;
 	cout << "constant num" << " : " << constant_num << endl;
 	cout << "id num" << " : " << id_num << endl;

@@ -2,7 +2,12 @@
 /* ' error in line258
 < ' : symbol > */
 
--100
+// -100
+
+
+//9999999999999999999999999999999999999999
+//INT may has overflow at line 113
+
 
 /* < -100 : constant >
 
@@ -12,3 +17,5 @@ constant num : 1 */
 
 
 // int a = 2147483647;
+
+
