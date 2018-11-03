@@ -323,7 +323,7 @@ string identifySym(string str, int& pos, int& line_num)
 				{
 					pos++;
 				}
-				line_num++;
+				// line_num++;
 				// pos++;
 				return "annotation";
 			}
