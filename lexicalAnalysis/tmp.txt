@@ -1,6 +1,14 @@
-'cc'
+// 'cc'
 /* ' error in line258
 < ' : symbol > */
-int a = 1;
+
+-100
+
+/* < -100 : constant >
+
+constant num : 1 */
+
 // 单引号中不能有两个字符
 
+
+// int a = 2147483647;

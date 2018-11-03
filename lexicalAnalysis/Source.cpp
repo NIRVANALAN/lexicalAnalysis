@@ -18,12 +18,14 @@ const string keyword[] = {
 	"default", "goto", "sizeof", "volatile", "do", "if", "while", "static"
 };
 const string symbol[] = {
-	"<", ">", "!=", ">=", "<=", "==", ",", ";", "(", ")", "{", "}", "+", "-", "*", "/", "=", "++", "--", "\"","[","]","'"
+	"<", ">", "!=", ">=", "<=", "==", ",", ";", "(", ")", "{", "}", "+", "-", "*", "/", "=", "++", "--", "\"", "[", "]",
+	"'"
 };
 auto line_num = 0;
 auto keyword_num = 0;
 auto symbol_num = 0;
 auto id_num = 0;
+auto constant_num = 0;
 auto string_num = 0;
 auto err_flag = 0;
 //存放文件取出的字符
@@ -112,7 +114,7 @@ int typeofWord(string str)
 		return 2; //num
 	if (str == ">" || str == "=" || str == "<" || str == "!" || str == "," || str == ";" || str == "(" || str == ")" ||
 		str == "{" || str == "}"
-		|| str == "+" || str == "-" || str == "*" || str == "/" || str == "[" || str == "]"||str=="'")
+		|| str == "+" || str == "-" || str == "*" || str == "/" || str == "[" || str == "]" || str == "'")
 		return 3; // form
 	if (str == "\"")
 		return 4;
@@ -247,23 +249,27 @@ string identifySym(string str, int& pos)
 			first == "+" || first == "-"))))
 			str.append(letter[pos]);
 	}
-		// for error process
+	// for error process
 	// char c = '';
 	// char c = 'cc';
-	if (first=="'"&&err_flag!=1)
+	if (first == "'" && err_flag != 1)
 	{
-		if(letter[pos+1]!="'")
+		if (letter[pos + 1] != "'")
 		{
 			err_flag = 1;
 			cerr << " multiple char include in ' error in line " << __LINE__ << endl;
 			//deal err
-			while (letter[pos]!="'")
+			while (letter[pos] != "'")
 			{
 				pos++;
 			}
 			pos ++;
 		}
-
+	}
+	if ((first == "-" || first == "+") && typeofWord(second) == 2)
+	{
+		str.append(second);
+		str = identifyNum(str, pos);
 	}
 	return str;
 }
@@ -327,7 +333,7 @@ void getWord()
 					word = identifyNum(letter[current_position], current_position);
 					if (isConstant(word))
 					{
-						id_num++;
+						constant_num++;
 						printRes(word, "constant");
 					}
 					break;
@@ -336,11 +342,18 @@ void getWord()
 				{
 					word = identifySym(letter[current_position], current_position);
 					if (word != "annotation")
+					{
 						if (isSymbol(word))
 						{
 							symbol_num++;
 							printRes(word, "symbol");
+							break;
 						}
+						constant_num++;
+						printRes(word, "constant");
+
+					}
+
 					break;
 				}
 			case 4:
@@ -394,10 +407,11 @@ int main()
 	read_file(example_file);
 	getWord();
 	cout << endl;
-	cout<<"id num"<<" : "<<id_num<<endl;
-	cout<<"string num"<<" : "<<string_num<<endl;
-	cout<<"keyword num"<<" : "<<keyword_num<<endl;
-	cout<<"symbol num"<<" : "<<symbol_num<<endl;
+	cout << "constant num" << " : " << constant_num << endl;
+	cout << "id num" << " : " << id_num << endl;
+	cout << "string num" << " : " << string_num << endl;
+	cout << "keyword num" << " : " << keyword_num << endl;
+	cout << "symbol num" << " : " << symbol_num << endl;
 	cout << "char num" << " : " << length << endl;
 	// cout << isLetter('s');
 	// for (auto i = 0; i < length; ++i)
