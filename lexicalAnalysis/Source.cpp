@@ -22,7 +22,7 @@ const string symbol[] = {
 	"<", ">", "!=", ">=", "<=", "==", ",", ";", "(", ")", "{", "}", "+", "-", "*", "/", "=", "++", "--", "\"", "[", "]",
 	"'"
 };
-auto line_num = 0;
+auto line_num = 1;
 auto keyword_num = 0;
 auto symbol_num = 0;
 auto id_num = 0;
@@ -50,7 +50,7 @@ void string2int(int& int_temp, const string& string_tem)
 void printFile(FILE* file)
 {
 	if (file == nullptr)
-		error_report( __LINE__, "file not exist");
+		error_report(__LINE__, "file not exist");
 
 	char ch = (char)fgetc(file);
 	while (ch != EOF)
@@ -124,6 +124,7 @@ void isInt(const string& str, int& i)
 	}
 }
 
+
 int typeofWord(string str)
 {
 	if ((str >= "a" && str <= "z") || (str >= "A" && str <= "Z"))
@@ -142,7 +143,26 @@ int typeofWord(string str)
 	// 	return 0;
 }
 
-bool isConstant(string str)
+
+void new_is_num(string& str, int& i, int& line_num)
+{
+	while (true)
+	{
+		
+
+		if (typeofWord(letter[i]) == 2)
+		{
+			str.append(letter[i]);
+			i++;
+		}
+
+		else
+			break;
+	}
+}
+
+
+bool isConstant(string str, const int& line)
 {
 	auto i = 0;
 	isInt(str, i);
@@ -180,6 +200,12 @@ bool isConstant(string str)
 			i++;
 			return true;
 		}
+		else
+			error_report(line, "cannot explain num");
+	}
+	else
+	{
+		error_report(line, "cannot explain num");
 	}
 
 
@@ -214,15 +240,64 @@ string identifyWord(string str, int& pos)
 	return str;
 }
 
-string identifyNum(string str, int& pos)
+string identifyNum(string str, int& pos, int& line_num)
 {
 	pos += 1;
-	while (typeofWord(letter[pos]) == 2 || letter[pos] == "." || letter[pos] == "E" || letter[pos] == "+" || letter[pos]
-		== "-")
+	new_is_num(str, pos, line_num);
+	auto int_temp = 0;
+	string2int(int_temp, str);
+	if (int_temp == INT_MAX)
+	{
+		error_report(line_num, "INT may overflow");
+		return "error";
+	}
+	// while (typeofWord(letter[pos]) == 2 || letter[pos] == "." || letter[pos] == "E" || letter[pos] == "+" || letter[pos]
+	// 	== "-")
+	// {
+	// 	str.append(letter[pos]);
+	// 	pos++;
+	// }
+	if (letter[pos] == ".")
 	{
 		str.append(letter[pos]);
 		pos++;
+		auto tmp = pos;
+		new_is_num(str, pos, line_num);
+		//err
+		if (tmp == pos)
+		{
+			error_report(line_num, "cannot resolve constant here");
+			while (letter[pos] != "\n")
+				pos++;
+			return "error";
+		}
+
+		if (letter[pos] == "E")
+		{
+			str.append(letter[pos]);
+			pos++;
+			if (letter[pos] == "+" || letter[pos] == "-")
+			{
+				str.append(letter[pos]);
+				pos++;
+				new_is_num(str, pos, line_num);
+				constant_num++;
+				return str;
+			}
+		}
 	}
+	if (letter[pos] == "E")
+	{
+		pos++;
+		if (str[pos] == '+' || str[pos] == '-')
+		{
+			pos++;
+			new_is_num(str, pos, line_num);
+			constant_num++;
+			return str;
+		}
+	}
+	constant_num++;
 	return str;
 }
 
@@ -231,7 +306,7 @@ bool endLine(int pos)
 	return false;
 }
 
-string identifySym(string str, int& pos)
+string identifySym(string str, int& pos, int& line_num)
 {
 	pos += 1;
 	auto first = letter[pos - 1];
@@ -248,7 +323,8 @@ string identifySym(string str, int& pos)
 				{
 					pos++;
 				}
-				pos++;
+				line_num++;
+				// pos++;
 				return "annotation";
 			}
 			if (second == "*")
@@ -257,6 +333,8 @@ string identifySym(string str, int& pos)
 				while (!(letter[pos] == "*" && letter[pos + 1] == "/"))
 				{
 					pos++;
+					if (letter[pos] == "\n")
+						line_num++;
 				}
 				pos += 2;
 				return "annotation";
@@ -275,7 +353,7 @@ string identifySym(string str, int& pos)
 		if (letter[pos + 1] != "'")
 		{
 			err_flag = 1;
-			cerr << " multiple char include in ' error in line " << __LINE__ << endl;
+			cerr << " multiple char include in ' error in line " << line_num << endl;
 			//deal err
 			while (letter[pos] != "'")
 			{
@@ -287,7 +365,7 @@ string identifySym(string str, int& pos)
 	if ((first == "-" || first == "+") && typeofWord(second) == 2)
 	{
 		str.append(second);
-		str = identifyNum(str, pos);
+		str = identifyNum(str, pos, line_num);
 	}
 	return str;
 }
@@ -317,7 +395,8 @@ void identifyMacro(int& pos)
 	{
 		pos++;
 	}
-	pos++;
+	// line_num++;
+	// pos++;
 }
 
 void getWord()
@@ -348,17 +427,18 @@ void getWord()
 				}
 			case 2:
 				{
-					word = identifyNum(letter[current_position], current_position);
-					if (isConstant(word))
-					{
-						constant_num++;
+					word = identifyNum(letter[current_position], current_position, line_num);
+					// if (isConstant(word, __LINE__))
+					// {
+					// constant_num++;
+					if (word != "error")
 						printRes(word, "constant");
-					}
+					// }
 					break;
 				}
 			case 3:
 				{
-					word = identifySym(letter[current_position], current_position);
+					word = identifySym(letter[current_position], current_position, line_num);
 					if (word != "annotation")
 					{
 						if (isSymbol(word))
@@ -369,7 +449,6 @@ void getWord()
 						}
 						constant_num++;
 						printRes(word, "constant");
-
 					}
 
 					break;
@@ -394,8 +473,13 @@ void getWord()
 				}
 			}
 		}
-		else
+		if (!enter.compare(letter[current_position]))
+		{
+			line_num++;
 			current_position++;
+		}
+		if (!backspace.compare(letter[current_position]))
+			current_position++;;
 	}
 }
 
@@ -421,7 +505,7 @@ int main()
 	FILE* file = nullptr;
 	char buff[MAX_LEN];
 	// ifstream example_file("prog.txt");
-	ifstream example_file("tmp.txt");
+	ifstream example_file("line.txt");
 	read_file(example_file);
 	getWord();
 	// string s("12345");
@@ -430,11 +514,14 @@ int main()
 	// cout << i<<endl;
 	cout << endl;
 	cout << "constant num" << " : " << constant_num << endl;
+	cout << "line num" << " : " << line_num << endl;
 	cout << "id num" << " : " << id_num << endl;
 	cout << "string num" << " : " << string_num << endl;
 	cout << "keyword num" << " : " << keyword_num << endl;
 	cout << "symbol num" << " : " << symbol_num << endl;
 	cout << "char num" << " : " << length << endl;
+
+
 	// cout << isLetter('s');
 	// for (auto i = 0; i < length; ++i)
 	// {

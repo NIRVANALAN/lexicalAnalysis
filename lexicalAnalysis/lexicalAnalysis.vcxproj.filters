@@ -32,5 +32,8 @@
     <Text Include="tmp.txt">
       <Filter>Resource Files\input</Filter>
     </Text>
+    <Text Include="line.txt">
+      <Filter>Resource Files\input</Filter>
+    </Text>
   </ItemGroup>
 </Project>

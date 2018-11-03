@@ -118,6 +118,7 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="line.txt" />
     <Text Include="prog.txt" />
     <Text Include="Text.txt" />
     <Text Include="tmp.txt" />

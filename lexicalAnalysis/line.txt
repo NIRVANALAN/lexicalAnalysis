@@ -1,0 +1,10 @@
+#include
+#define
+int main(){
+
+const string s = "abcdf";
+int a = 1;
+4.a
+int t = 9999999999999999999999999999999999999999;
+//INT may has overflow at line 8
+}
