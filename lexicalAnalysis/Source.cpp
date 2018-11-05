@@ -5,6 +5,7 @@
 #include <cassert>
 #include <sstream>
 #include <algorithm>
+#include <ctype.h>
 
 #define MAX_LEN 1000
 using namespace std;
@@ -377,7 +378,7 @@ void printRes(string str, string res)
 
 string identifyString(string str, int& pos)
 {
-	// pos += 1;
+	pos += 1;
 	while (letter[pos] != "\\" && letter[pos + 1] != ";")
 	{
 		str.append(letter[pos]);
@@ -406,10 +407,12 @@ void getWord()
 	{
 		if (backspace.compare(letter[current_position]) && enter.compare(letter[current_position]))
 		{
-			auto type = typeofWord(letter[current_position]);
-			switch (type)
+			if (isascii(letter[current_position].c_str()[0]))
 			{
-			case 1:
+				auto type = typeofWord(letter[current_position]);
+				switch (type)
+				{
+				case 1:
 				{
 					word = identifyWord(letter[current_position], current_position);
 					if (isKeyword(word))
@@ -420,12 +423,16 @@ void getWord()
 					}
 					else if (isId(word))
 					{
+						if (word.length() > 32)
+						{
+							error_report(line_num, "identifier length greater than 32, and it may not be allowed in all platform");
+						}
 						id_num++;
-						printRes(word, "id");
+						printRes(word, "identifier");
 					}
 					break;
 				}
-			case 2:
+				case 2:
 				{
 					word = identifyNum(letter[current_position], current_position, line_num);
 					// if (isConstant(word, __LINE__))
@@ -436,7 +443,7 @@ void getWord()
 					// }
 					break;
 				}
-			case 3:
+				case 3:
 				{
 					word = identifySym(letter[current_position], current_position, line_num);
 					if (word != "annotation")
@@ -453,7 +460,7 @@ void getWord()
 
 					break;
 				}
-			case 4:
+				case 4:
 				{
 					word = identifyString(letter[current_position], current_position);
 					{
@@ -462,16 +469,23 @@ void getWord()
 					}
 					break;
 				}
-			case 5:
+				case 5:
 				{
 					identifyMacro(current_position);
 					// printRes(word, "Macro");
 					break;
 				}
-			default:
+				default:
 				{
 				}
+				}
 			}
+			else
+			{
+				error_report(line_num, "cannot read non-ascii character");
+				current_position++;
+			}
+			
 		}
 		if (!enter.compare(letter[current_position]))
 		{
@@ -521,13 +535,14 @@ int main()
 	cout << "symbol num" << " : " << symbol_num << endl;
 	cout << "char num" << " : " << length << endl;
 
+	// string ss = "a";
+	// cout << isascii(ss.c_str()[0]) << endl;
 
 	// cout << isLetter('s');
 	// for (auto i = 0; i < length; ++i)
 	// {
 	// 	cout << letter[i];
 	// }
-
 	// cout << typeofWord("[");
 	// cout << isConstant("46E-8");
 	// cout << isKeyword("int");

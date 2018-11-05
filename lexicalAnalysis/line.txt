@@ -1,10 +1,19 @@
-#include
-#define
+#include <stdlib.h>
+#define MAX 1000
 int main(){
 
-const string s = "abcdf";
+const char* s = "abcdf";
 int a = 1;
+char c = 'cc';
 4.a
 int t = 9999999999999999999999999999999999999999;
 //INT may has overflow at line 8
+int constant = 4.E;
+//cannot resolve constant here at line 11
+coust double sssssssssssssssssssssssssssssssssssssssssss = 3.3;
+int 我 = 10;
+/* cannot read non-ascii character at line 14
+cannot read non-ascii character at line 14
+// 以中文字符为例，因为会占据两个字符的位置，所以报错信息会输出两便，这不是程序出错 */
+return 0;
 }
