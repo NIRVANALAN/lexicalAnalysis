@@ -5,7 +5,7 @@
 #include <cassert>
 #include <sstream>
 #include <algorithm>
-#include <ctype.h>
+#include <cctype>
 
 #define MAX_LEN 1000
 using namespace std;
