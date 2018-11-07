@@ -1,9 +1,8 @@
 #include <stdlib.h>
 #define MAX 1000
 int main(){
-
-const char* s = "abcdf";
-int a = 1;
+	const char* s = "abcdf";
+	int a = 1;
 char c = 'cc';
 4.a
 int t = 9999999999999999999999999999999999999999;

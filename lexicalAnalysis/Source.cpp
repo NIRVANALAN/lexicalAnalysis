@@ -12,6 +12,7 @@ using namespace std;
 int current_position = 0; // record current reading position
 const string backspace = " ";
 const string enter = "\n";
+const string table = "\t";
 const string preprocess = "#";
 const string keyword[] = {
 	"auto", "double", "int", "struct", "break", "else", "long", "switch",
@@ -405,7 +406,7 @@ void getWord()
 	string word;
 	for (current_position = 0; current_position < length;)
 	{
-		if (backspace.compare(letter[current_position]) && enter.compare(letter[current_position]))
+		if (backspace.compare(letter[current_position]) && enter.compare(letter[current_position])&&table.compare(letter[current_position]))
 		{
 			if (isascii(letter[current_position].c_str()[0]))
 			{
@@ -492,7 +493,7 @@ void getWord()
 			line_num++;
 			current_position++;
 		}
-		if (!backspace.compare(letter[current_position]))
+		if (!backspace.compare(letter[current_position])|| !table.compare(letter[current_position]))
 			current_position++;;
 	}
 }
