@@ -150,8 +150,6 @@ void new_is_num(string& str, int& i, int& line_num)
 {
 	while (true)
 	{
-		
-
 		if (typeofWord(letter[i]) == 2)
 		{
 			str.append(letter[i]);
@@ -332,14 +330,35 @@ string identifySym(string str, int& pos, int& line_num)
 			if (second == "*")
 			{
 				pos++;
-				while (!(letter[pos] == "*" && letter[pos + 1] == "/"))
+
+				while (true)
 				{
-					pos++;
-					if (letter[pos] == "\n")
-						line_num++;
+					if (letter[pos] != "\"")
+					{
+						if (!(letter[pos] == "*" && letter[pos + 1] == "/"))
+						{
+							pos++;
+							if (letter[pos] == "\n")
+								line_num++;
+						}
+						else { break; }
+
+					}
+					else
+					{
+						pos++;
+						while (letter[pos]!="\"")
+						{
+							pos++;
+						}
+						pos++;
+						continue;
+					}
+
 				}
 				pos += 2;
 				return "annotation";
+
 			}
 		}
 		// for operator like == >= <= !=
@@ -406,7 +425,8 @@ void getWord()
 	string word;
 	for (current_position = 0; current_position < length;)
 	{
-		if (backspace.compare(letter[current_position]) && enter.compare(letter[current_position])&&table.compare(letter[current_position]))
+		if (backspace.compare(letter[current_position]) && enter.compare(letter[current_position]) && table.compare(
+			letter[current_position]))
 		{
 			if (isascii(letter[current_position].c_str()[0]))
 			{
@@ -414,71 +434,73 @@ void getWord()
 				switch (type)
 				{
 				case 1:
-				{
-					word = identifyWord(letter[current_position], current_position);
-					if (isKeyword(word))
 					{
-						printRes(word, "keyword");
-						keyword_num++;
-						break;
-					}
-					else if (isId(word))
-					{
-						if (word.length() > 32)
+						word = identifyWord(letter[current_position], current_position);
+						if (isKeyword(word))
 						{
-							error_report(line_num, "identifier length greater than 32, and it may not be allowed in all platform");
-						}
-						id_num++;
-						printRes(word, "identifier");
-					}
-					break;
-				}
-				case 2:
-				{
-					word = identifyNum(letter[current_position], current_position, line_num);
-					// if (isConstant(word, __LINE__))
-					// {
-					// constant_num++;
-					if (word != "error")
-						printRes(word, "constant");
-					// }
-					break;
-				}
-				case 3:
-				{
-					word = identifySym(letter[current_position], current_position, line_num);
-					if (word != "annotation")
-					{
-						if (isSymbol(word))
-						{
-							symbol_num++;
-							printRes(word, "symbol");
+							printRes(word, "keyword");
+							keyword_num++;
 							break;
 						}
-						constant_num++;
-						printRes(word, "constant");
+						else if (isId(word))
+						{
+							if (word.length() > 32)
+							{
+								error_report(
+									line_num,
+									"identifier length greater than 32, and it may not be allowed in all platform");
+							}
+							id_num++;
+							printRes(word, "identifier");
+						}
+						break;
 					}
-
-					break;
-				}
-				case 4:
-				{
-					word = identifyString(letter[current_position], current_position);
+				case 2:
 					{
-						string_num++;
-						printRes(word, "string");
+						word = identifyNum(letter[current_position], current_position, line_num);
+						// if (isConstant(word, __LINE__))
+						// {
+						// constant_num++;
+						if (word != "error")
+							printRes(word, "constant");
+						// }
+						break;
 					}
-					break;
-				}
+				case 3:
+					{
+						word = identifySym(letter[current_position], current_position, line_num);
+						if (word != "annotation")
+						{
+							if (isSymbol(word))
+							{
+								symbol_num++;
+								printRes(word, "symbol");
+								break;
+							}
+							constant_num++;
+							printRes(word, "constant");
+						}
+
+						break;
+					}
+				case 4:
+					{
+						word = identifyString(letter[current_position], current_position);
+						{
+							string_num++;
+							printRes(word, "string");
+						}
+						break;
+					}
 				case 5:
-				{
-					identifyMacro(current_position);
-					// printRes(word, "Macro");
-					break;
-				}
+					{
+						identifyMacro(current_position);
+						// printRes(word, "Macro");
+						break;
+					}
 				default:
-				{
-				}
+					{
+					}
 				}
 			}
 			else
@@ -486,14 +508,13 @@ void getWord()
 				error_report(line_num, "cannot read non-ascii character");
 				current_position++;
 			}
-			
 		}
 		if (!enter.compare(letter[current_position]))
 		{
 			line_num++;
 			current_position++;
 		}
-		if (!backspace.compare(letter[current_position])|| !table.compare(letter[current_position]))
+		if (!backspace.compare(letter[current_position]) || !table.compare(letter[current_position]))
 			current_position++;;
 	}
 }

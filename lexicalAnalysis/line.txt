@@ -14,5 +14,6 @@ int 我 = 10;
 /* cannot read non-ascii character at line 14
 cannot read non-ascii character at line 14
 // 以中文字符为例，因为会占据两个字符的位置，所以报错信息会输出两便，这不是程序出错 */
+/*123"*/"*/
 return 0;
 }
