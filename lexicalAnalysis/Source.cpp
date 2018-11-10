@@ -6,6 +6,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cctype>
+#include <iomanip>
 
 #define MAX_LEN 1000
 using namespace std;
@@ -342,23 +343,20 @@ string identifySym(string str, int& pos, int& line_num)
 								line_num++;
 						}
 						else { break; }
-
 					}
 					else
 					{
 						pos++;
-						while (letter[pos]!="\"")
+						while (letter[pos] != "\"")
 						{
 							pos++;
 						}
 						pos++;
 						continue;
 					}
-
 				}
 				pos += 2;
 				return "annotation";
-
 			}
 		}
 		// for operator like == >= <= !=
@@ -549,13 +547,13 @@ int main()
 	// string2int(i, s);
 	// cout << i<<endl;
 	cout << endl;
-	cout << "constant num" << " : " << constant_num << endl;
-	cout << "line num" << " : " << line_num << endl;
-	cout << "id num" << " : " << id_num << endl;
-	cout << "string num" << " : " << string_num << endl;
-	cout << "keyword num" << " : " << keyword_num << endl;
-	cout << "symbol num" << " : " << symbol_num << endl;
-	cout << "char num" << " : " << length << endl;
+	cout << left << setw(15) << "constant num" << " : " << constant_num << endl;
+	cout << setw(15) << "line num" << " : " << line_num << endl;
+	cout << setw(15) << "id num" << " : " << id_num << endl;
+	cout << setw(15) << "string num" << " : " << string_num << endl;
+	cout << setw(15) << "keyword num" << " : " << keyword_num << endl;
+	cout << setw(15) << "symbol num" << " : " << symbol_num << endl;
+	cout << setw(15) << "char num" << " : " << length << endl;
 
 	// string ss = "a";
 	// cout << isascii(ss.c_str()[0]) << endl;

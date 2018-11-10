@@ -8,6 +8,7 @@ char c = 'cc';
 int t = 9999999999999999999999999999999999999999;
 //INT may has overflow at line 8
 int constant = 4.E;
+double d = 4.68E-5;
 //cannot resolve constant here at line 11
 coust double sssssssssssssssssssssssssssssssssssssssssss = 3.3;
 int ÎÒ = 10;
